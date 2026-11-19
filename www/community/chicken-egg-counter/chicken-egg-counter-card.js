@@ -25,6 +25,7 @@ class ChickenEggCounterCard extends HTMLElement {
     this._config = {};
     this._hass = null;
     this._pendingCounts = {};
+    this._recordedCounts = {};
     this._saving = false;
   }
 
@@ -56,8 +57,10 @@ class ChickenEggCounterCard extends HTMLElement {
       const entityId = `sensor.eggs_today_${color.replace(/\s+/g, "_")}`;
       const state = this._hass.states[entityId];
       const recorded = state ? parseInt(state.state, 10) || 0 : 0;
+      this._recordedCounts[color] = recorded;
       const badge = this.shadowRoot.querySelector(`[data-recorded="${color}"]`);
       if (badge) badge.textContent = recorded;
+      if ((this._pendingCounts[color] || 0) < -recorded) this._setPending(color, -recorded);
     }
     this._updateTotal();
   }
@@ -70,24 +73,37 @@ class ChickenEggCounterCard extends HTMLElement {
   _updateTotal() {
     const totalEl = this.shadowRoot.querySelector(".grand-total");
     if (!totalEl) return;
-    let total = 0;
+    let added = 0;
+    let removed = 0;
     for (const color of this._config.colors) {
-      total += this._pendingCounts[color] || 0;
+      const v = this._pendingCounts[color] || 0;
+      if (v > 0) added += v;
+      else removed -= v;
     }
-    totalEl.textContent = `+${total} pending`;
-    totalEl.style.display = total > 0 ? "block" : "none";
+    const parts = [];
+    if (added) parts.push(`+${added}`);
+    if (removed) parts.push(`−${removed}`);
+    totalEl.textContent = `${parts.join(" / ")} unsaved`;
+    totalEl.style.display = parts.length ? "block" : "none";
+  }
+
+  _setPending(color, value) {
+    this._pendingCounts[color] = value;
+    const el = this.shadowRoot.querySelector(`[data-pending="${color}"]`);
+    if (!el) return;
+    el.textContent = value > 0 ? `+${value}` : value < 0 ? `−${-value}` : "0";
+    el.classList.toggle("negative", value < 0);
   }
 
   _adjustCount(color, delta) {
-    this._pendingCounts[color] = Math.max(0, (this._pendingCounts[color] || 0) + delta);
-    const el = this.shadowRoot.querySelector(`[data-pending="${color}"]`);
-    if (el) el.textContent = this._pendingCounts[color];
+    const min = -(this._recordedCounts[color] || 0);
+    this._setPending(color, Math.max(min, (this._pendingCounts[color] || 0) + delta));
     this._updateTotal();
   }
 
   async _save() {
     if (!this._hass || this._saving) return;
-    const toSave = Object.entries(this._pendingCounts).filter(([, v]) => v > 0);
+    const toSave = Object.entries(this._pendingCounts).filter(([, v]) => v !== 0);
     if (toSave.length === 0) return;
 
     this._saving = true;
@@ -96,16 +112,17 @@ class ChickenEggCounterCard extends HTMLElement {
 
     try {
       for (const [color, count] of toSave) {
-        await this._hass.callService("chicken_egg_counter", "add_eggs", {
-          color,
-          count,
-          ...(this._config.date ? { date: this._config.date } : {}),
-        });
-      }
-      for (const color of this._config.colors) {
-        this._pendingCounts[color] = 0;
-        const el = this.shadowRoot.querySelector(`[data-pending="${color}"]`);
-        if (el) el.textContent = 0;
+        await this._hass.callService(
+          "chicken_egg_counter",
+          count > 0 ? "add_eggs" : "remove_eggs",
+          {
+            color,
+            count: Math.abs(count),
+            ...(this._config.date ? { date: this._config.date } : {}),
+          },
+        );
+        // Clear per color so a mid-batch failure doesn't re-send what already saved.
+        this._setPending(color, 0);
       }
       this._showToast("Saved!");
     } catch (e) {
@@ -179,7 +196,7 @@ class ChickenEggCounterCard extends HTMLElement {
         }
         .btn {
           background: var(--primary-color, #03a9f4);
-          color: white;
+          color: black;
           border: none;
           border-radius: 50%;
           width: 28px;
@@ -201,6 +218,7 @@ class ChickenEggCounterCard extends HTMLElement {
           color: var(--primary-color, #03a9f4);
           font-size: 1em;
         }
+        .pending.negative { color: var(--error-color, #c0392b); }
         .footer {
           margin-top: 14px;
           display: flex;
@@ -209,7 +227,7 @@ class ChickenEggCounterCard extends HTMLElement {
         }
         .save-btn {
           background: var(--primary-color, #03a9f4);
-          color: white;
+          color: black;
           border: none;
           border-radius: 6px;
           padding: 8px 20px;
@@ -246,7 +264,7 @@ class ChickenEggCounterCard extends HTMLElement {
         }
       </style>
       <ha-card>
-        <div class="title"><span>🐔</span>${this._config.title}</div>
+        <div class="title">${this._config.title}</div>
         ${colors.map(color => `
           <div class="color-row">
             <div class="egg-dot" style="background:${colorStyle(color)}"></div>

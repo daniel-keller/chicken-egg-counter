@@ -273,7 +273,7 @@ class ChickenEggReportCard extends HTMLElement {
         }
         .tab.active {
           background: var(--primary-color, #03a9f4);
-          color: white;
+          color: black;
         }
         .chart-view canvas { width: 100%; display: block; }
         .legend {
@@ -292,7 +292,7 @@ class ChickenEggReportCard extends HTMLElement {
         .loading { color: var(--secondary-text-color); font-size: 0.9em; padding: 20px 0; text-align: center; }
       </style>
       <ha-card>
-        <div class="title"><span>📊</span>${this._config.title}</div>
+        <div class="title">${this._config.title}</div>
         <div class="tabs">
           <button class="tab tab-bar active">Chart</button>
           <button class="tab tab-table">Table</button>
