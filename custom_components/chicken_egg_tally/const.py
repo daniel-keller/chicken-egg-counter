@@ -1,4 +1,4 @@
-DOMAIN = "chicken_egg_tally"
+DOMAIN = "chicken_egg_counter"
 
 STORAGE_KEY = f"{DOMAIN}.data"
 STORAGE_VERSION = 1
@@ -6,7 +6,7 @@ STORAGE_VERSION = 1
 CONF_EGG_COLORS = "egg_colors"
 CONF_NAME = "name"
 
-DEFAULT_NAME = "Chicken Egg Tally"
+DEFAULT_NAME = "Chicken Egg Counter"
 DEFAULT_EGG_COLORS = ["brown", "white", "blue", "green", "pink", "speckled", "other"]
 
 ATTR_COLOR = "color"

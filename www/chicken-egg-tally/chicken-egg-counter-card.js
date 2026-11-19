@@ -1,6 +1,6 @@
 /**
- * Chicken Egg Tally Card
- * Daily tally widget for recording eggs by color.
+ * Chicken Egg Counter Card
+ * Daily counter widget for recording eggs by color.
  */
 
 const EGG_COLOR_MAP = {
@@ -18,7 +18,7 @@ function colorStyle(color) {
   return c.hex;
 }
 
-class ChickenEggTallyCard extends HTMLElement {
+class ChickenEggCounterCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -33,7 +33,7 @@ class ChickenEggTallyCard extends HTMLElement {
       throw new Error("chicken-egg-counter-card: 'colors' array is required.");
     }
     this._config = {
-      title: config.title || "Egg Tally",
+      title: config.title || "Egg Counter",
       colors: config.colors,
       date: config.date || null,
     };
@@ -96,7 +96,7 @@ class ChickenEggTallyCard extends HTMLElement {
 
     try {
       for (const [color, count] of toSave) {
-        await this._hass.callService("chicken_egg_tally", "add_eggs", {
+        await this._hass.callService("chicken_egg_counter", "add_eggs", {
           color,
           count,
           ...(this._config.date ? { date: this._config.date } : {}),
@@ -288,17 +288,17 @@ class ChickenEggTallyCard extends HTMLElement {
   static getStubConfig() {
     return {
       type: "custom:chicken-egg-counter-card",
-      title: "Egg Tally",
+      title: "Egg Counter",
       colors: ["brown", "white", "blue", "green", "speckled"],
     };
   }
 }
 
-customElements.define("chicken-egg-counter-card", ChickenEggTallyCard);
+customElements.define("chicken-egg-counter-card", ChickenEggCounterCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "chicken-egg-counter-card",
-  name: "Chicken Egg Tally",
+  name: "Chicken Egg Counter",
   description: "Record daily egg collection by color.",
   preview: true,
 });

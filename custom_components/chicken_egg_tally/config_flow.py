@@ -13,7 +13,7 @@ from .const import (
 )
 
 
-class ChickenEggTallyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ChickenEggCounterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
@@ -52,10 +52,10 @@ class ChickenEggTallyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return ChickenEggTallyOptionsFlow(config_entry)
+        return ChickenEggCounterOptionsFlow(config_entry)
 
 
-class ChickenEggTallyOptionsFlow(config_entries.OptionsFlow):
+class ChickenEggCounterOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         self.config_entry = config_entry
 

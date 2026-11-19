@@ -13,7 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class EggStore:
-    """Manages persistent storage of egg tally data."""
+    """Manages persistent storage of egg counter data."""
 
     def __init__(self, hass: HomeAssistant) -> None:
         self._store = Store(hass, STORAGE_VERSION, STORAGE_KEY)

@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Chicken Egg Tally",
+        "title": "Chicken Egg Counter",
         "description": "Set up egg tracking for your flock.",
         "data": {
           "egg_colors": "Egg colors to track (comma-separated)",
@@ -14,7 +14,7 @@
       "invalid_colors": "Please enter at least one color."
     },
     "abort": {
-      "already_configured": "Chicken Egg Tally is already configured."
+      "already_configured": "Chicken Egg Counter is already configured."
     }
   },
   "options": {

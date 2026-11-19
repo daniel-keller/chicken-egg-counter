@@ -1,4 +1,4 @@
-# Chicken Egg Tally — Home Assistant Integration
+# Chicken Egg Counter — Home Assistant Integration
 
 Track daily egg collection by color and view historical breakdowns on your dashboard.
 
@@ -16,7 +16,7 @@ Click the button below to open your Home Assistant instance and add this reposit
 
 After clicking the button:
 1. HACS will ask you to confirm adding the custom repository.
-2. Find **Chicken Egg Tally** in HACS and click **Download**.
+2. Find **Chicken Egg Counter** in HACS and click **Download**.
 3. Restart Home Assistant.
 4. Add the integration via **Settings → Devices & Services → Add Integration**.
 
@@ -28,8 +28,8 @@ After clicking the button:
 
 | Path | Purpose |
 |------|---------|
-| `custom_components/chicken_egg_tally/` | HA custom integration (sensors + services) |
-| `www/chicken-egg-counter/chicken-egg-counter-card.js` | Daily tally Lovelace card |
+| `custom_components/chicken_egg_counter/` | HA custom integration (sensors + services) |
+| `www/chicken-egg-counter/chicken-egg-counter-card.js` | Daily counter Lovelace card |
 | `www/chicken-egg-counter/chicken-egg-report-card.js` | Historical report Lovelace card |
 
 ---
@@ -38,10 +38,10 @@ After clicking the button:
 
 ### 1. Copy Files
 
-Copy `custom_components/chicken_egg_tally/` into your HA config directory:
+Copy `custom_components/chicken_egg_counter/` into your HA config directory:
 
 ```
-<config>/custom_components/chicken_egg_tally/
+<config>/custom_components/chicken_egg_counter/
 ```
 
 Copy `www/chicken-egg-counter/` into:
@@ -54,7 +54,7 @@ Copy `www/chicken-egg-counter/` into:
 
 1. Restart Home Assistant.
 2. Go to **Settings → Devices & Services → Add Integration**.
-3. Search for **Chicken Egg Tally**.
+3. Search for **Chicken Egg Counter**.
 4. Enter your egg colors (comma-separated, e.g. `brown, white, blue, green, speckled`).
 
 ### 3. Register the Lovelace Resources
@@ -84,12 +84,12 @@ Sensor values reset to 0 at midnight as "today" rolls over.
 
 ## Services
 
-### `chicken_egg_tally.add_eggs`
+### `chicken_egg_counter.add_eggs`
 
 Record eggs collected.
 
 ```yaml
-service: chicken_egg_tally.add_eggs
+service: chicken_egg_counter.add_eggs
 data:
   color: brown
   count: 3
@@ -97,23 +97,23 @@ data:
   # note: "Found in nesting box 2"
 ```
 
-### `chicken_egg_tally.remove_eggs`
+### `chicken_egg_counter.remove_eggs`
 
 Correct a mistake.
 
 ```yaml
-service: chicken_egg_tally.remove_eggs
+service: chicken_egg_counter.remove_eggs
 data:
   color: brown
   count: 1
 ```
 
-### `chicken_egg_tally.reset_day`
+### `chicken_egg_counter.reset_day`
 
 Clear all entries for a day.
 
 ```yaml
-service: chicken_egg_tally.reset_day
+service: chicken_egg_counter.reset_day
 data: {}   # omit date to reset today
 ```
 
@@ -121,7 +121,7 @@ data: {}   # omit date to reset today
 
 ## Dashboard Cards
 
-### Daily Tally Card
+### Daily Counter Card
 
 Add eggs by color with + / − buttons, then hit **Save**.
 
@@ -186,10 +186,10 @@ views:
 
 ## Data Storage
 
-Egg records are stored in `<config>/.storage/chicken_egg_tally.data` as a JSON list of entries. Each entry records the date, color, count, timestamp, and optional note. Corrections use negative counts so the full audit trail is preserved.
+Egg records are stored in `<config>/.storage/chicken_egg_counter.data` as a JSON list of entries. Each entry records the date, color, count, timestamp, and optional note. Corrections use negative counts so the full audit trail is preserved.
 
 ---
 
 ## Customizing Colors
 
-Go to **Settings → Devices & Services → Chicken Egg Tally → Configure** to update the tracked colors at any time. The color list affects which per-color sensors are created; historical data for removed colors is kept in storage.
+Go to **Settings → Devices & Services → Chicken Egg Counter → Configure** to update the tracked colors at any time. The color list affects which per-color sensors are created; historical data for removed colors is kept in storage.

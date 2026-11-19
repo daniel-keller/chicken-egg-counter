@@ -80,7 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         day = call.data.get(ATTR_DATE)
         await store.async_reset_day(day)
         async_dispatcher_send(hass, SIGNAL_UPDATE)
-        _LOGGER.debug("Reset egg tally for %s", day or date.today())
+        _LOGGER.debug("Reset egg counter for %s", day or date.today())
 
     hass.services.async_register(
         DOMAIN, SERVICE_ADD_EGGS, handle_add_eggs, schema=ADD_EGGS_SCHEMA
