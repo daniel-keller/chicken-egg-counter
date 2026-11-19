@@ -96,7 +96,7 @@ class ChickenEggCounterCard extends HTMLElement {
 
     try {
       for (const [color, count] of toSave) {
-        await this._hass.callService("chicken_egg_counter", "add_eggs", {
+        await this._hass.callService("chicken-egg-counter", "add_eggs", {
           color,
           count,
           ...(this._config.date ? { date: this._config.date } : {}),

@@ -1,4 +1,4 @@
-DOMAIN = "chicken_egg_counter"
+DOMAIN = "chicken-egg-counter"
 
 STORAGE_KEY = f"{DOMAIN}.data"
 STORAGE_VERSION = 1
