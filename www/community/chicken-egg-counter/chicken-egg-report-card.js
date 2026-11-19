@@ -17,6 +17,13 @@ function getColorHex(color, idx) {
   return known[color.toLowerCase()] || PALETTE[idx % PALETTE.length];
 }
 
+// The integration buckets eggs by local date, so the report must too (toISOString would use UTC).
+function localDate(d) {
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
 class ChickenEggReportCard extends HTMLElement {
   constructor() {
     super();
@@ -85,13 +92,13 @@ class ChickenEggReportCard extends HTMLElement {
       if (!colorMatch) continue;
       const color = colorMatch[1];
 
+      // Entries are chronological, so the last value each day is that day's total after any removals.
       for (const entry of entries) {
         const val = parseInt(entry.s, 10);
-        if (isNaN(val) || val <= 0) continue;
-        const day = new Date(typeof entry.lu === "number" ? entry.lu * 1000 : entry.lu).toISOString().split("T")[0];
+        if (isNaN(val)) continue;
+        const day = localDate(new Date(typeof entry.lu === "number" ? entry.lu * 1000 : entry.lu));
         result[day] = result[day] || {};
-        // Take the max value seen for a day (sensor resets at midnight)
-        result[day][color] = Math.max(result[day][color] || 0, val);
+        result[day][color] = val;
       }
     }
     return result;
@@ -104,12 +111,12 @@ class ChickenEggReportCard extends HTMLElement {
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
-      dates.push(d.toISOString().split("T")[0]);
+      dates.push(localDate(d));
     }
 
     const colors = new Set();
     for (const data of Object.values(dailyData)) {
-      for (const c of Object.keys(data)) colors.add(c);
+      for (const [c, v] of Object.entries(data)) if (v > 0) colors.add(c);
     }
     const colorList = Array.from(colors).sort();
 
@@ -180,7 +187,7 @@ class ChickenEggReportCard extends HTMLElement {
   }
 
   _buildTableHTML(dates, colorList, dailyData) {
-    const activeDates = dates.filter(d => dailyData[d]);
+    const activeDates = dates.filter(d => Object.values(dailyData[d] || {}).some(v => v > 0));
     if (activeDates.length === 0) return "<p class='empty'>No data recorded yet.</p>";
 
     const rows = [...activeDates].reverse().slice(0, 60);
