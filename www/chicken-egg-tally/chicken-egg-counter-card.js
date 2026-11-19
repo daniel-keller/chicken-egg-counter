@@ -30,7 +30,7 @@ class ChickenEggTallyCard extends HTMLElement {
 
   setConfig(config) {
     if (!config.colors || !Array.isArray(config.colors)) {
-      throw new Error("chicken-egg-tally-card: 'colors' array is required.");
+      throw new Error("chicken-egg-counter-card: 'colors' array is required.");
     }
     this._config = {
       title: config.title || "Egg Tally",
@@ -287,17 +287,17 @@ class ChickenEggTallyCard extends HTMLElement {
 
   static getStubConfig() {
     return {
-      type: "custom:chicken-egg-tally-card",
+      type: "custom:chicken-egg-counter-card",
       title: "Egg Tally",
       colors: ["brown", "white", "blue", "green", "speckled"],
     };
   }
 }
 
-customElements.define("chicken-egg-tally-card", ChickenEggTallyCard);
+customElements.define("chicken-egg-counter-card", ChickenEggTallyCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "chicken-egg-tally-card",
+  type: "chicken-egg-counter-card",
   name: "Chicken Egg Tally",
   description: "Record daily egg collection by color.",
   preview: true,

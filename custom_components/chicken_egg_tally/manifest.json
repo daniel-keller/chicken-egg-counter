@@ -2,7 +2,7 @@
   "domain": "chicken_egg_tally",
   "name": "Chicken Egg Tally",
   "version": "1.0.0",
-  "documentation": "https://github.com/your-repo/chicken-egg-tally",
+  "documentation": "https://github.com/your-repo/chicken-egg-counter",
   "dependencies": [],
   "codeowners": [],
   "requirements": [],

@@ -10,7 +10,7 @@ Track daily egg collection by color and view historical breakdowns on your dashb
 
 Click the button below to open your Home Assistant instance and add this repository directly:
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=daniel-keller&repository=chicken-egg-tally&category=integration)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=daniel-keller&repository=chicken-egg-counter&category=integration)
 
 > **Before publishing:** replace `daniel-keller` in the button URL above (and in the badge link) with your actual GitHub username, and make sure the repository name matches.
 
@@ -20,7 +20,7 @@ After clicking the button:
 3. Restart Home Assistant.
 4. Add the integration via **Settings → Devices & Services → Add Integration**.
 
-> **Lovelace cards** are not installed by HACS automatically. After installing the integration, copy `www/chicken-egg-tally/` into `<config>/www/` and register the two JS files as Lovelace Resources (see [Manual Installation](#manual-installation) below).
+> **Lovelace cards** are not installed by HACS automatically. After installing the integration, copy `www/chicken-egg-counter/` into `<config>/www/` and register the two JS files as Lovelace Resources (see [Manual Installation](#manual-installation) below).
 
 ---
 
@@ -29,8 +29,8 @@ After clicking the button:
 | Path | Purpose |
 |------|---------|
 | `custom_components/chicken_egg_tally/` | HA custom integration (sensors + services) |
-| `www/chicken-egg-tally/chicken-egg-tally-card.js` | Daily tally Lovelace card |
-| `www/chicken-egg-tally/chicken-egg-report-card.js` | Historical report Lovelace card |
+| `www/chicken-egg-counter/chicken-egg-counter-card.js` | Daily tally Lovelace card |
+| `www/chicken-egg-counter/chicken-egg-report-card.js` | Historical report Lovelace card |
 
 ---
 
@@ -44,10 +44,10 @@ Copy `custom_components/chicken_egg_tally/` into your HA config directory:
 <config>/custom_components/chicken_egg_tally/
 ```
 
-Copy `www/chicken-egg-tally/` into:
+Copy `www/chicken-egg-counter/` into:
 
 ```
-<config>/www/chicken-egg-tally/
+<config>/www/chicken-egg-counter/
 ```
 
 ### 2. Add the Integration
@@ -63,8 +63,8 @@ In HA go to **Settings → Dashboards → Resources** and add:
 
 | URL | Type |
 |-----|------|
-| `/local/chicken-egg-tally/chicken-egg-tally-card.js` | JavaScript Module |
-| `/local/chicken-egg-tally/chicken-egg-report-card.js` | JavaScript Module |
+| `/local/chicken-egg-counter/chicken-egg-counter-card.js` | JavaScript Module |
+| `/local/chicken-egg-counter/chicken-egg-report-card.js` | JavaScript Module |
 
 ---
 
@@ -126,7 +126,7 @@ data: {}   # omit date to reset today
 Add eggs by color with + / − buttons, then hit **Save**.
 
 ```yaml
-type: custom:chicken-egg-tally-card
+type: custom:chicken-egg-counter-card
 title: "Morning Egg Collection"
 colors:
   - brown
@@ -158,7 +158,7 @@ Switch between **Chart** (stacked bars by color per day) and **Table** (sortable
 views:
   - title: Chickens
     cards:
-      - type: custom:chicken-egg-tally-card
+      - type: custom:chicken-egg-counter-card
         title: "Today's Egg Collection"
         colors:
           - brown
