@@ -1,0 +1,76 @@
+add_eggs:
+  name: Add Eggs
+  description: Record eggs collected today (or a specific date).
+  fields:
+    color:
+      name: Color
+      description: The color of the eggs (e.g. brown, white, blue).
+      required: true
+      example: "brown"
+      selector:
+        text:
+    count:
+      name: Count
+      description: Number of eggs to add.
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 100
+          mode: box
+    date:
+      name: Date
+      description: Date to record eggs for (YYYY-MM-DD). Defaults to today.
+      required: false
+      example: "2024-01-15"
+      selector:
+        text:
+    note:
+      name: Note
+      description: Optional note about the collection.
+      required: false
+      example: "Found two in the nesting box"
+      selector:
+        text:
+
+remove_eggs:
+  name: Remove Eggs
+  description: Remove a previously recorded egg count (correction).
+  fields:
+    color:
+      name: Color
+      description: The color of the eggs to remove.
+      required: true
+      example: "brown"
+      selector:
+        text:
+    count:
+      name: Count
+      description: Number of eggs to remove.
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 100
+          mode: box
+    date:
+      name: Date
+      description: Date to remove eggs from (YYYY-MM-DD). Defaults to today.
+      required: false
+      example: "2024-01-15"
+      selector:
+        text:
+
+reset_day:
+  name: Reset Day
+  description: Clear all egg records for a day.
+  fields:
+    date:
+      name: Date
+      description: Date to reset (YYYY-MM-DD). Defaults to today.
+      required: false
+      example: "2024-01-15"
+      selector:
+        text:

@@ -1,0 +1,304 @@
+/**
+ * Chicken Egg Tally Card
+ * Daily tally widget for recording eggs by color.
+ */
+
+const EGG_COLOR_MAP = {
+  brown:    { hex: "#8B5E3C", emoji: "🥚" },
+  white:    { hex: "#F5F0E8", emoji: "🥚" },
+  blue:     { hex: "#7BAFD4", emoji: "🥚" },
+  green:    { hex: "#7DAF7B", emoji: "🥚" },
+  pink:     { hex: "#F4A7B9", emoji: "🥚" },
+  speckled: { hex: "#C4A86B", emoji: "🥚" },
+  other:    { hex: "#A09080", emoji: "🥚" },
+};
+
+function colorStyle(color) {
+  const c = EGG_COLOR_MAP[color.toLowerCase()] || { hex: "#A09080" };
+  return c.hex;
+}
+
+class ChickenEggTallyCard extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._config = {};
+    this._hass = null;
+    this._pendingCounts = {};
+    this._saving = false;
+  }
+
+  setConfig(config) {
+    if (!config.colors || !Array.isArray(config.colors)) {
+      throw new Error("chicken-egg-tally-card: 'colors' array is required.");
+    }
+    this._config = {
+      title: config.title || "Egg Tally",
+      colors: config.colors,
+      date: config.date || null,
+    };
+    this._pendingCounts = {};
+    for (const color of this._config.colors) {
+      this._pendingCounts[color] = 0;
+    }
+    this._render();
+  }
+
+  set hass(hass) {
+    this._hass = hass;
+    this._updateSensorValues();
+  }
+
+  _updateSensorValues() {
+    if (!this._hass || !this.shadowRoot) return;
+    const today = this._getTargetDate();
+    for (const color of this._config.colors) {
+      const entityId = `sensor.eggs_today_${color.replace(/\s+/g, "_")}`;
+      const state = this._hass.states[entityId];
+      const recorded = state ? parseInt(state.state, 10) || 0 : 0;
+      const badge = this.shadowRoot.querySelector(`[data-recorded="${color}"]`);
+      if (badge) badge.textContent = recorded;
+    }
+    this._updateTotal();
+  }
+
+  _getTargetDate() {
+    if (this._config.date) return this._config.date;
+    return new Date().toISOString().split("T")[0];
+  }
+
+  _updateTotal() {
+    const totalEl = this.shadowRoot.querySelector(".grand-total");
+    if (!totalEl) return;
+    let total = 0;
+    for (const color of this._config.colors) {
+      total += this._pendingCounts[color] || 0;
+    }
+    totalEl.textContent = `+${total} pending`;
+    totalEl.style.display = total > 0 ? "block" : "none";
+  }
+
+  _adjustCount(color, delta) {
+    this._pendingCounts[color] = Math.max(0, (this._pendingCounts[color] || 0) + delta);
+    const el = this.shadowRoot.querySelector(`[data-pending="${color}"]`);
+    if (el) el.textContent = this._pendingCounts[color];
+    this._updateTotal();
+  }
+
+  async _save() {
+    if (!this._hass || this._saving) return;
+    const toSave = Object.entries(this._pendingCounts).filter(([, v]) => v > 0);
+    if (toSave.length === 0) return;
+
+    this._saving = true;
+    const saveBtn = this.shadowRoot.querySelector(".save-btn");
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "Saving…"; }
+
+    try {
+      for (const [color, count] of toSave) {
+        await this._hass.callService("chicken_egg_tally", "add_eggs", {
+          color,
+          count,
+          ...(this._config.date ? { date: this._config.date } : {}),
+        });
+      }
+      for (const color of this._config.colors) {
+        this._pendingCounts[color] = 0;
+        const el = this.shadowRoot.querySelector(`[data-pending="${color}"]`);
+        if (el) el.textContent = 0;
+      }
+      this._showToast("Saved!");
+    } catch (e) {
+      this._showToast("Error saving. Check logs.", true);
+    } finally {
+      this._saving = false;
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "Save"; }
+      this._updateTotal();
+    }
+  }
+
+  _showToast(msg, error = false) {
+    const toast = this.shadowRoot.querySelector(".toast");
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.style.background = error ? "#c0392b" : "#27ae60";
+    toast.style.opacity = "1";
+    setTimeout(() => { toast.style.opacity = "0"; }, 2000);
+  }
+
+  _render() {
+    if (!this._config.colors) return;
+    const colors = this._config.colors;
+
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display: block; }
+        ha-card {
+          padding: 16px;
+          font-family: var(--paper-font-body1_-_font-family, sans-serif);
+        }
+        .title {
+          font-size: 1.1em;
+          font-weight: 600;
+          margin-bottom: 16px;
+          color: var(--primary-text-color);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .title span { font-size: 1.3em; }
+        .color-row {
+          display: flex;
+          align-items: center;
+          margin-bottom: 10px;
+          gap: 8px;
+        }
+        .egg-dot {
+          width: 20px;
+          height: 24px;
+          border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+          border: 1px solid rgba(0,0,0,0.15);
+          flex-shrink: 0;
+        }
+        .color-label {
+          flex: 1;
+          text-transform: capitalize;
+          color: var(--primary-text-color);
+          font-size: 0.95em;
+        }
+        .recorded {
+          font-size: 0.85em;
+          color: var(--secondary-text-color);
+          min-width: 28px;
+          text-align: right;
+        }
+        .controls {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .btn {
+          background: var(--primary-color, #03a9f4);
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          font-size: 1.1em;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: opacity 0.15s;
+        }
+        .btn:active { opacity: 0.7; }
+        .btn.minus { background: var(--error-color, #c0392b); }
+        .pending {
+          min-width: 28px;
+          text-align: center;
+          font-weight: 600;
+          color: var(--primary-color, #03a9f4);
+          font-size: 1em;
+        }
+        .footer {
+          margin-top: 14px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .save-btn {
+          background: var(--primary-color, #03a9f4);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 20px;
+          font-size: 0.95em;
+          cursor: pointer;
+          font-weight: 600;
+          transition: opacity 0.15s;
+        }
+        .save-btn:disabled { opacity: 0.5; cursor: default; }
+        .grand-total {
+          font-size: 0.85em;
+          color: var(--primary-color, #03a9f4);
+          display: none;
+        }
+        .toast {
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #27ae60;
+          color: white;
+          padding: 8px 20px;
+          border-radius: 20px;
+          font-size: 0.9em;
+          opacity: 0;
+          transition: opacity 0.4s;
+          z-index: 9999;
+          pointer-events: none;
+        }
+        .divider {
+          border: none;
+          border-top: 1px solid var(--divider-color, rgba(0,0,0,0.12));
+          margin: 10px 0;
+        }
+      </style>
+      <ha-card>
+        <div class="title"><span>🐔</span>${this._config.title}</div>
+        ${colors.map(color => `
+          <div class="color-row">
+            <div class="egg-dot" style="background:${colorStyle(color)}"></div>
+            <div class="color-label">${color}</div>
+            <div class="recorded" data-recorded="${color}">0</div>
+            <div class="controls">
+              <button class="btn minus" data-color="${color}" data-delta="-1">−</button>
+              <div class="pending" data-pending="${color}">0</div>
+              <button class="btn" data-color="${color}" data-delta="1">+</button>
+            </div>
+          </div>
+        `).join("")}
+        <hr class="divider"/>
+        <div class="footer">
+          <button class="save-btn">Save</button>
+          <div class="grand-total"></div>
+        </div>
+        <div class="toast"></div>
+      </ha-card>
+    `;
+
+    this.shadowRoot.querySelectorAll("button[data-color]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const color = btn.dataset.color;
+        const delta = parseInt(btn.dataset.delta, 10);
+        this._adjustCount(color, delta);
+      });
+    });
+
+    this.shadowRoot.querySelector(".save-btn").addEventListener("click", () => {
+      this._save();
+    });
+
+    this._updateSensorValues();
+  }
+
+  getCardSize() { return Math.ceil(this._config.colors.length * 0.6) + 2; }
+
+  static getStubConfig() {
+    return {
+      type: "custom:chicken-egg-tally-card",
+      title: "Egg Tally",
+      colors: ["brown", "white", "blue", "green", "speckled"],
+    };
+  }
+}
+
+customElements.define("chicken-egg-tally-card", ChickenEggTallyCard);
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "chicken-egg-tally-card",
+  name: "Chicken Egg Tally",
+  description: "Record daily egg collection by color.",
+  preview: true,
+});
