@@ -20,7 +20,7 @@ After clicking the button:
 3. Restart Home Assistant.
 4. Add the integration via **Settings → Devices & Services → Add Integration**.
 
-> **Lovelace cards** are not installed by HACS automatically. After installing the integration, copy `www/chicken-egg-counter/` into `<config>/www/` and register the two JS files as Lovelace Resources (see [Manual Installation](#manual-installation) below).
+> **Lovelace cards** are not installed by HACS automatically. After installing the integration, copy `www/community/chicken-egg-counter/` into `<config>/www/community/` and register the two JS files as Lovelace Resources (see [Manual Installation](#manual-installation) below).
 
 ---
 
@@ -28,9 +28,9 @@ After clicking the button:
 
 | Path | Purpose |
 |------|---------|
-| `custom_components/chicken-egg-counter/` | HA custom integration (sensors + services) |
-| `www/chicken-egg-counter/chicken-egg-counter-card.js` | Daily counter Lovelace card |
-| `www/chicken-egg-counter/chicken-egg-report-card.js` | Historical report Lovelace card |
+| `custom_components/chicken_egg_counter/` | HA custom integration (sensors + services) |
+| `www/community/chicken-egg-counter/chicken-egg-counter-card.js` | Daily counter Lovelace card |
+| `www/community/chicken-egg-counter/chicken-egg-report-card.js` | Historical report Lovelace card |
 
 ---
 
@@ -38,16 +38,16 @@ After clicking the button:
 
 ### 1. Copy Files
 
-Copy `custom_components/chicken-egg-counter/` into your HA config directory:
+Copy `custom_components/chicken_egg_counter/` into your HA config directory:
 
 ```
-<config>/custom_components/chicken-egg-counter/
+<config>/custom_components/chicken_egg_counter/
 ```
 
-Copy `www/chicken-egg-counter/` into:
+Copy `www/community/chicken-egg-counter/` into:
 
 ```
-<config>/www/chicken-egg-counter/
+<config>/www/community/chicken-egg-counter/
 ```
 
 ### 2. Add the Integration
@@ -63,8 +63,8 @@ In HA go to **Settings → Dashboards → Resources** and add:
 
 | URL | Type |
 |-----|------|
-| `/local/chicken-egg-counter/chicken-egg-counter-card.js` | JavaScript Module |
-| `/local/chicken-egg-counter/chicken-egg-report-card.js` | JavaScript Module |
+| `/local/community/chicken-egg-counter/chicken-egg-counter-card.js` | JavaScript Module |
+| `/local/community/chicken-egg-counter/chicken-egg-report-card.js` | JavaScript Module |
 
 ---
 
@@ -84,12 +84,12 @@ Sensor values reset to 0 at midnight as "today" rolls over.
 
 ## Services
 
-### `chicken-egg-counter.add_eggs`
+### `chicken_egg_counter.add_eggs`
 
 Record eggs collected.
 
 ```yaml
-service: chicken-egg-counter.add_eggs
+service: chicken_egg_counter.add_eggs
 data:
   color: brown
   count: 3
@@ -97,23 +97,23 @@ data:
   # note: "Found in nesting box 2"
 ```
 
-### `chicken-egg-counter.remove_eggs`
+### `chicken_egg_counter.remove_eggs`
 
 Correct a mistake.
 
 ```yaml
-service: chicken-egg-counter.remove_eggs
+service: chicken_egg_counter.remove_eggs
 data:
   color: brown
   count: 1
 ```
 
-### `chicken-egg-counter.reset_day`
+### `chicken_egg_counter.reset_day`
 
 Clear all entries for a day.
 
 ```yaml
-service: chicken-egg-counter.reset_day
+service: chicken_egg_counter.reset_day
 data: {}   # omit date to reset today
 ```
 
@@ -186,7 +186,7 @@ views:
 
 ## Data Storage
 
-Egg records are stored in `<config>/.storage/chicken-egg-counter.data` as a JSON list of entries. Each entry records the date, color, count, timestamp, and optional note. Corrections use negative counts so the full audit trail is preserved.
+Egg records are stored in `<config>/.storage/chicken_egg_counter.data` as a JSON list of entries. Each entry records the date, color, count, timestamp, and optional note. Corrections use negative counts so the full audit trail is preserved.
 
 ---
 
