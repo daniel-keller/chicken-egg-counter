@@ -29,7 +29,7 @@ PLATFORMS = ["sensor"]
 ADD_EGGS_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_COLOR): cv.string,
-        vol.Required(ATTR_COUNT): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
+        vol.Required(ATTR_COUNT): vol.All(vol.Coerce(int), vol.Range(min=1, max=999)),
         vol.Optional(ATTR_DATE): cv.string,
         vol.Optional(ATTR_NOTE): cv.string,
     }

@@ -38,31 +38,8 @@ class ChickenEggReportCard extends HTMLElement {
   set hass(hass) {
     const wasNull = !this._hass;
     this._hass = hass;
-    // Pull data from the total sensor's attributes
-    this._loadData();
     if (wasNull) this._render();
     else this._updateChart();
-  }
-
-  _loadData() {
-    if (!this._hass) return;
-
-    // Find the total sensor (has by_color attribute per day aggregated by HA history)
-    // We use a websocket API call to fetch history from HA
-    // For simplicity we read from the sensor's extra state attributes which the
-    // store exposes via a special "history" sensor if configured.
-    // Fallback: build from individual color sensors.
-    const totalSensor = this._findTotalSensor();
-    if (totalSensor && totalSensor.attributes.history) {
-      this._data = totalSensor.attributes.history;
-    }
-  }
-
-  _findTotalSensor() {
-    if (!this._hass) return null;
-    return Object.values(this._hass.states).find(
-      s => s.entity_id.startsWith("sensor.eggs_today") && s.entity_id.endsWith("_total")
-    ) || null;
   }
 
   _getAllColorSensors() {
@@ -106,12 +83,12 @@ class ChickenEggReportCard extends HTMLElement {
     for (const [entityId, entries] of Object.entries(histories || {})) {
       const colorMatch = entityId.match(/sensor\.eggs_today_(.+)/);
       if (!colorMatch) continue;
-      const color = colorMatch[1].replace(/_/g, " ");
+      const color = colorMatch[1];
 
       for (const entry of entries) {
         const val = parseInt(entry.s, 10);
         if (isNaN(val) || val <= 0) continue;
-        const day = new Date(entry.lu * 1000).toISOString().split("T")[0];
+        const day = new Date(typeof entry.lu === "number" ? entry.lu * 1000 : entry.lu).toISOString().split("T")[0];
         result[day] = result[day] || {};
         // Take the max value seen for a day (sensor resets at midnight)
         result[day][color] = Math.max(result[day][color] || 0, val);

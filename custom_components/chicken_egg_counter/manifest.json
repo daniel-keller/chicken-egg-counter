@@ -1,5 +1,5 @@
 {
-  "domain": "chicken-egg-counter",
+  "domain": "chicken_egg_counter",
   "name": "Chicken Egg Counter",
   "version": "1.0.0",
   "documentation": "https://github.com/your-repo/chicken-egg-counter",
